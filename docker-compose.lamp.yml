@@ -1,0 +1,23 @@
+version: '3.5'
+
+services:
+  # LAMP Server
+  lamp-c7:
+    container_name: lamp-c7
+    build: 
+      context: ./docker_files
+      dockerfile: lamp-c7
+    tty: true
+    volumes:
+      # shared apache default.conf between host and container
+      # - ./etc/http:/etc/http/conf.d/default.conf
+      # shared the directory /var/www/html
+      - ./html:/var/www/html
+      #- /sys/fs/cgroup:/sys/fs/cgroup:ro 
+      - /tmp/$(mktemp -d):/run
+    restart: always
+    network_mode: host
+
+
+
+

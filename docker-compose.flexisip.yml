@@ -1,0 +1,23 @@
+version: '3.5'
+
+services:
+  # Flexisip SIP Server
+  flexisip-c7:
+    container_name: flexisip-c7
+    build: 
+      context: ./docker_files
+      dockerfile: flexisip-c7    
+    volumes:
+      - ./letsencrypt:/etc/flexisip/tls
+      - ./config:/etc/flexisip
+      - ./db:/var/lib/mysql 
+     ### If you are using TLS Support for Apache to listen on 443 in the container drop them in /certs and set these:
+     #- TLS_CERT=cert.pem
+     #- TLS_KEY=key.pem
+    restart: always
+    network_mode: host
+    privileged: true                           
+    command: /sbin/init
+
+
+
