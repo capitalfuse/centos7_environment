@@ -33,5 +33,6 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait
 RUN chmod +x /wait
 RUN yum clean all
 
-ENTRYPOINT ["/flexisip-entrypoint.sh"]
-CMD flexisip
+# Make the proxy and presence servers to start on system boot
+RUN systemctl enable flexisip-proxy flexisip-presence
+CMD ["/usr/sbin/init"]

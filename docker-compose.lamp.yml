@@ -9,15 +9,27 @@ services:
       dockerfile: lamp-c7
     tty: true
     volumes:
+      # for Systemd integration:https://hub.docker.com/_/centos
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro 
+      - ${MAKE_TEMP}:/run
+      # shared database
+      - mariadb:/var/lib/mysql
+      # for laravel php framework
+      # - ./html:/var/www/html:rw
+      # - ./etc/flexisip-account-manager:/etc/flexisip-account-manager:rw
       # shared apache default.conf between host and container
       # - ./etc/http:/etc/http/conf.d/default.conf
       # shared the directory /var/www/html
-      - ./html:/var/www/html
-      #- /sys/fs/cgroup:/sys/fs/cgroup:ro 
-      - /tmp/$(mktemp -d):/run
+      # - ./html:/var/www/html 
     restart: always
     network_mode: host
+    cap_add:
+      - SYS_ADMIN
+    privileged: true
+    devices:
+      - /dev/fuse
 
-
-
-
+# need to "$ docker volume create mariadb"
+volumes:
+  mariadb:
+    external: true 
