@@ -60,7 +60,7 @@ $ mariadb
 In phpmyadmin or mariadb console, create user "flexisip" with the same database "flexisip", password "password1234"
 
 
-## 7. Modify the following files
+## 7. Modify the following files and create table for flexisip
 
 Input DB_USER, DB_PASSWORD and DB_NAME defined by the above.
 
@@ -71,7 +71,7 @@ Input DB_USER, DB_PASSWORD and DB_NAME defined by the above.
  *
  * Default value: flexisip_rw
  */
-define("DB_USER", "flexisip");
+define("DB_USER", "root");
 
 /*
  * The database user's password.
@@ -86,6 +86,10 @@ define("DB_PASSWORD", "password1234");
  * Default value: flexisip
  */
 define("DB_NAME", "flexisip");
+```
+Implement the following script to make flexisip table
+```
+$ php /opt/belledonne-communications/share/flexisip-account-manager/tools/create_tables.php
 ```
 
 
