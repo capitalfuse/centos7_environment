@@ -22,6 +22,7 @@ RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm \
 # Install flexisip-account-manager
 RUN yum -y install centos-release-scl-rh
 RUN yum -y install bc-flexisip-account-manager \
+&& chown -R apache:apache /opt/belledonne-communications/share/flexisip-account-manager
 && cp /opt/rh/httpd24/root/etc/httpd/conf.d/flexisip-account-manager.conf /etc/httpd/conf.d/
 
 

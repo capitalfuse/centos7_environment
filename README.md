@@ -7,7 +7,7 @@
 ## 1. Build CentOS7 Base Image with working systemd
 ```
 $ cd dockerfiles/centos7_systemd_base_image
-$ $ docker build --rm -t local/c7-systemd .
+$ docker build --rm -t local/c7-systemd .
 ```
 Confirm this image
 ```
@@ -43,11 +43,15 @@ If you don't run containers under Ubuntu host, move `"MAKE_TEMP=/tmp/$(mktemp -d
 ```
 $ MAKE_TEMP=/tmp/$(mktemp -d) docker-compose -f docker-compose.flexisip.yml up -d
 ```
-
+---
 If you want to deploy on the production CentOS system, check the following dockerfiles
 
 `docker_files/lamp-c7`
+
 `docker_files/flexisip-c7`
+
+Implement the commands **COPY, RUN and ENV** lines in your Linux OS terminal.
+---
 
 ## 5. Set mariadb root password
 For login to phpmyadmin by "root" admin user, set password in mariadb console.
@@ -87,9 +91,145 @@ define("DB_PASSWORD", "password1234");
  */
 define("DB_NAME", "flexisip");
 ```
+
 Implement the following script to make flexisip table
 ```
 $ php /opt/belledonne-communications/share/flexisip-account-manager/tools/create_tables.php
 ```
+
+## 8. Load Custom Settings by XMLRPC Server(Provisioning)
+
+To active the override remote provisioning, "REMOTE_PROVISIONING_OVERWRITE_ALL" should be set to "True"
+
+`/etc/flexisip-account-manager/provisioning.conf`
+```
+define("REMOTE_PROVISIONING_OVERWRITE_ALL", True);
+```
+
+By Creating the following `default.rc`, this is transformed automatically to provisioning XML file format by 
+accessing : `https://sip.example.cpm/flexisip-account-manager/provisioning.php`
+In this case, you should input this URL as provisioning URL into Linphone Android "Remote Setting" menu.
+
+`/opt/belledonne-communications/share/flexisip-account-manager/xmlrpc/default.rc`
+```
+#
+#This file shall not contain path referencing package name, in order to be portable when app is renamed.
+#Paths to resources must be set from LinphoneManager, after creating LinphoneCore.
+[assistant]
+domain=sip.example.com
+xmlrpc_url=https://sip.example.com/flexisip-account-manager/xmlrpc.php
+```
+OR
+
+You can create own provisioning file by XML format like the below;
+
+`/opt/belledonne-communications/share/flexisip-account-manager/xmlrpc/custom_provisioning.xml`
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.linphone.org/xsds/lpconfig.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.linphone.org/xsds/lpconfig.xsd lpconfig.xsd">
+	<section name="assistant">
+		<entry name="domain" overwrite="true">sip.example.com</entry>
+		<entry name="xmlrpc_url" overwrite="true">https://sip.example.com/flexisip-account-manager/xmlrpc.php</entry>
+	</section>
+</config>
+```
+In this case, you should input the below URL as provisioning URL into Linphone Android "Remote Setting" menu.
+`https://sip.example.cpm/flexisip-account-manager/custom_provisioning.xml`
+
+Please see also the following reference about provisioning;
+https://wiki.linphone.org/xwiki/wiki/public/view/Lib/Features/Remote%20Provisioning/
+
+## 9. Flexisip-Account-Manager Web Frontend
+
+Modify the following file to access localhost database.
+
+`/etc/flexisip-account-manager/fleiapi.env`
+```
+.....
+.....
+# Local FlexiAPI database
+DB_DATABASE=/var/opt/belledonne-communications/flexiapi/storage/db.sqlite
+
+# External FlexiSIP database
+DB_EXTERNAL_DRIVER=mysql
+DB_EXTERNAL_HOST=127.0.0.1
+DB_EXTERNAL_PORT=3306
+#DB_EXTERNAL_DATABASE=/var/opt/belledonne-communications/flexiapi/storage/external.db.sqlite
+DB_EXTERNAL_DATABASE=flexisip
+DB_EXTERNAL_USERNAME=root
+DB_EXTERNAL_PASSWORD=password1234
+.....
+.....
+```
+
+Implement the following php artisan command in
+'/opt/belledonne-communications/share/flexisip-account-manager/flexiapi`
+```
+$ cd /opt/belledonne-communications/share/flexisip-account-manager/flexiapi
+$ php artisan migrate:rollback
+$ php artisan migrate
+```
+
+As not exist server.php in /opt/belledonne-communications/share/flexisip-account-manager/flexiapi directory
+make it.
+`/opt/belledonne-communications/share/flexisip-account-manager/flexiapi/server.php`
+```
+<?php
+
+/**
+ * Laravel - A PHP Framework For Web Artisans
+ *
+ * @package  Laravel
+ * @author   Taylor Otwell <taylor@laravel.com>
+ */
+
+$uri = urldecode(
+    parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)
+);
+
+// This file allows us to emulate Apache's "mod_rewrite" functionality from the
+// built-in PHP web server. This provides a convenient way to test a Laravel
+// application without having installed a "real" web server software here.
+if ($uri !== '/' && file_exists(__DIR__.'/public'.$uri)) {
+    return false;
+}
+
+require_once __DIR__.'/public/index.php';
+
+```
+
+Start flexisip-account-manager server:
+```
+$ php artisan serve --host 127.0.0.1
+```
+Access
+
+`http://localhost:8000`
+
+If you try latest version frontend, download it from github and copy it into this directory;
+`/opt/belledonne-communications/share/flexisip-account-manager/flexiapi`
+
+**Github**
+'https://gitlab.linphone.org/BC/public/flexisip-account-manager/tree/master/flexiapi'
+
+![flexiapi create and manage account](/images/flexiapi001.png)
+
+![flexiapi register new account](/images/flexiapi002.png)
+
+![flexiapi register by email](/images/flexiapi003.png)
+
+![flexiapi register by phone](/images/flexiapi004.png)
+
+![flexiapi login](/images/flexiapi005.png)
+
+
+
+
+
+
+
+
+
+
 
 
