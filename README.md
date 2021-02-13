@@ -43,7 +43,9 @@ If you don't run containers under Ubuntu host, move `"MAKE_TEMP=/tmp/$(mktemp -d
 ```
 $ MAKE_TEMP=/tmp/$(mktemp -d) docker-compose -f docker-compose.flexisip.yml up -d
 ```
+
 ---
+
 If you want to deploy on the production CentOS system, check the following dockerfiles
 
 `docker_files/lamp-c7`
@@ -51,6 +53,7 @@ If you want to deploy on the production CentOS system, check the following docke
 `docker_files/flexisip-c7`
 
 Implement the commands **COPY, RUN and ENV** lines in your Linux OS terminal.
+
 ---
 
 ## 5. Set mariadb root password
@@ -107,7 +110,8 @@ define("REMOTE_PROVISIONING_OVERWRITE_ALL", True);
 ```
 
 By Creating the following `default.rc`, this is transformed automatically to provisioning XML file format by 
-accessing : `https://sip.example.cpm/flexisip-account-manager/provisioning.php`
+accessing : `https://sip.example.cpm/flexisip-account-manager/provisioning.php` .
+
 In this case, you should input this URL as provisioning URL into Linphone Android "Remote Setting" menu.
 
 `/opt/belledonne-communications/share/flexisip-account-manager/xmlrpc/default.rc`
