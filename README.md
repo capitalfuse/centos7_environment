@@ -249,7 +249,10 @@ If you try latest version frontend, download it from github and copy it into thi
 
 ![flexiapi register by phone](/images/flexiapi004.png)
 
-![flexiapi login](/images/flexiapi005.png)
+![flexiapi login](/images/account.png)
+
+![flexiapi login](/images/account_database.png)
+
 
 
 
