@@ -100,6 +100,61 @@ Implement the following script to make flexisip table
 $ php /opt/belledonne-communications/share/flexisip-account-manager/tools/create_tables.php
 ```
 
+Configure Flexisip-Account-Manager API: Input the following sections to meet your requirements.
+
+`/etc/flexisip-account-manager/flexiapi.env`
+```
+.......
+.......
+
+# Local FlexiAPI database
+DB_DATABASE=/var/opt/belledonne-communications/flexiapi/storage/db.sqlite
+
+# External FlexiSIP database
+DB_EXTERNAL_DRIVER=mysql
+DB_EXTERNAL_HOST=127.0.0.1
+DB_EXTERNAL_PORT=3306
+#DB_EXTERNAL_DATABASE=/var/opt/belledonne-communications/flexiapi/storage/external.db.sqlite
+DB_EXTERNAL_DATABASE=flexisip
+DB_EXTERNAL_USERNAME=root
+DB_EXTERNAL_PASSWORD=password1234
+...........
+...........
+...........
+# SMTP and emails
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.XXXXX
+MAIL_PORT=XXXX
+MAIL_USERNAME=XXXXXXXX
+MAIL_PASSWORD=XXXXXXXX
+MAIL_FROM_ADDRESS=from@example.com
+MAIL_FROM_NAME="${APP_NAME}"
+MAIL_ALLOW_SELF_SIGNED=false
+MAIL_VERIFY_PEER=true
+MAIL_VERIFY_PEER_NAME=true
+MAIL_SIGNATURE="The Example Team"
+
+# OVH SMS API variables
+OVH_APP_KEY=
+OVH_APP_SECRET=
+OVH_APP_ENDPOINT=ovh-eu
+OVH_APP_CONSUMER_KEY=
+OVH_APP_SENDER=
+
+# Google reCaptcha v2 parameters
+NOCAPTCHA_SECRET=XXXXXXXXXXXXXXXXXXXX
+NOCAPTCHA_SITEKEY=XXXXXXXXXXXXXXXXXXX
+```
+
+Change the following directory owner to **apache** and implement **php artisan** command;
+```
+$ chown -R apache:apache /opt/belledonne-communications/share/flexisip-account-manager/flexiapi
+$ cd /opt/belledonne-communications/share/flexisip-account-manager/flexiapi
+$ php artisan key:generate
+$ php artisan migrate:rollback
+$ php artisan migrate
+```
+
 ## 8. Load Custom Settings by XMLRPC Server(Provisioning)
 
 To active the override remote provisioning, "REMOTE_PROVISIONING_OVERWRITE_ALL" should be set to "True"
