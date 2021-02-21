@@ -12,19 +12,12 @@ freetype-dev libjpeg-turbo-dev zip libxml2-dev icu-dev nodejs-current npm
 # Install Apache
 RUN yum -y install httpd httpd-mod_ssl httpd-mod_auth_mellon httpd-mod_security openssl
 
-# Install PHP 7 
+# Install PHP 7.3 
 RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm \
 && yum-config-manager --disable remi-php54 \
 && yum-config-manager --enable remi-php73 \
 && yum -y install php php-cli php-fpm php-mysqlnd php-zip php-devel php-gd php-mcrypt php-mbstring php-curl php-xml php-pear php-bcmath php-json \
    php-pdo php-soap php-xmlrpc php-xml php-opcache php-pdo_mysql php-zip php-mysqli php-intl
-
-# Install flexisip-account-manager
-RUN yum -y install centos-release-scl-rh
-RUN yum -y install bc-flexisip-account-manager \
-&& chown -R apache:apache /opt/belledonne-communications/share/flexisip-account-manager
-&& cp /opt/rh/httpd24/root/etc/httpd/conf.d/flexisip-account-manager.conf /etc/httpd/conf.d/
-
 
 # Reconfigure Apache
 RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/httpd/conf/httpd.conf
@@ -47,6 +40,10 @@ RUN yum install -y phpMyAdmin \
 # After start container, MariaDB [(none)]> set password for 'root'@localhost = password("password1234");
 COPY MariaDB.repo /etc/yum.repos.d/MariaDB.repo
 RUN yum -y install MariaDB-server MariaDB-client
+### Create database and use and set root password in docker container lamp-c7
+########## $ mariadb -u root -e 'create database flexisip;'
+########## $ mariadb -u root -e 'grant all privileges on flexisip.* TO 'flexisip'@'localhost' identified by 'password1234';'
+########## $ mariadb -u root -e 'set password for 'root'@localhost = password("password1234");'
 # Place VOLUME statement below all changes to /var/lib/mysql
 VOLUME /var/lib/mysql
 #EXPOSE 3306
@@ -68,12 +65,46 @@ RUN cd /var/www/html \
 && composer global require laravel/installer \
 && ln -s /root/.config/composer/vendor/laravel/installer/bin/laravel /usr/local/bin/laravel
 
+# Install flexisip-account-manager
+#RUN yum -y install centos-release-scl-rh \
+#RUN yum -y install bc-flexisip-account-manager \
+#&& chown -R apache:apache /opt/belledonne-communications/share/flexisip-account-manager
+#&& cp /opt/rh/httpd24/root/etc/httpd/conf.d/flexisip-account-manager.conf /etc/httpd/conf.d/
+### OR
+# Install latest flexisip-account-manager from github
+RUN mkdir -p /opt/belledonne-communications/share/flexisip-account-manager /etc/flexisip-account-manager /var/opt/belledonne-communications/flexiapi/storage \
+&& cd /tmp \
+&& git clone https://gitlab.linphone.org/BC/public/flexisip-account-manager.git \
+&& cd flexisip-account-manager \
+&& cp -R flexiapi /opt/belledonne-communications/share/flexisip-account-manager/ \
+&& cp -R src/* /opt/belledonne-communications/share/flexisip-account-manager/ \
+&& cp -R conf/* /etc/flexisip-account-manager/ \
+&& cp httpd/* /etc/httpd/conf.d/ \
+### setting connfig file for flexisip account manager
+&& sed -i "s/\"DB_USER\",.*\".*\"/\"DB_USER\", \"root\"/g" /etc/flexisip-account-manager/db.conf \
+&& sed -i "s/\"DB_PASSWORD\",.*\".*\"/\"DB_PASSWORD\", \"password1234\"/g" /etc/flexisip-account-manager/db.conf \
+&& sed -i "s/\"DB_NAME\",.*\".*\"/\"DB_NAME\", \"flexisip\"/g" /etc/flexisip-account-manager/db.conf \
+&& sed -i "s/(\"REMOTE_PROVISIONING_OVERWRITE_ALL\",.*);/(\"REMOTE_PROVISIONING_OVERWRITE_ALL\", True);/g" /etc/flexisip-account-manager/provisioning.conf \
+&& touch /var/opt/belledonne-communications/flexiapi/storage/db.sqlite \
+&& chown -R apache:apache /opt/belledonne-communications/share/flexisip-account-manager \
+&& cd /opt/belledonne-communications/share/flexisip-account-manager/flexiapi \
+&& composer install --no-dev
+### Implement the below php commnds in docker container lamp-c7
+########## $ php /opt/belledonne-communications/share/flexisip-account-manager/tools/create_tables.php
+########## $ php artisan key:generate
+########## $ php artisan migrate:rollback
+########## $ php artisan migrate
+### set an account admin user {account_id}, in advance create user and use user's account_id 
+########## $ php artisan accounts:set-admin 1
+
 # Make the log directory and the log file for flexisip-account-manager    
 RUN mkdir -p /var/opt/belledonne-communications/log \
 && cd /var/opt/belledonne-communications/log \
 && touch account-manager.log \
 && chown apache:apache account-manager.log
+
 #EXPOSE 80
+
 RUN systemctl enable httpd.service mariadb.service redis.service
 CMD ["/usr/sbin/init"]
 

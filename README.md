@@ -238,6 +238,54 @@ Access
 If you try latest version frontend, download it from github and copy it into this directory;
 `/opt/belledonne-communications/share/flexisip-account-manager/flexiapi`
 
+## 10. Manual install Flexisip-Account-Manager from Github
+
+If you want to install the latest flexisip-account-manager, add a manual install section in docker_files/lamp-c7 like the following
+```
+....
+# Install latest flexisip-account-manager from github
+RUN mkdir -p /opt/belledonne-communications/share/flexisip-account-manager /etc/flexisip-account-manager /var/opt/belledonne-communications/flexiapi/storage \
+&& cd /tmp \
+&& git clone https://gitlab.linphone.org/BC/public/flexisip-account-manager.git \
+&& cd flexisip-account-manager \
+&& cp -R flexiapi /opt/belledonne-communications/share/flexisip-account-manager/ \
+&& cp -R src/* /opt/belledonne-communications/share/flexisip-account-manager/ \
+&& cp -R conf/* /etc/flexisip-account-manager/ \
+&& cp httpd/* /etc/httpd/conf.d/ \
+### setting connfig file for flexisip account manager
+&& sed -i "s/\"DB_USER\",.*\".*\"/\"DB_USER\", \"root\"/g" /etc/flexisip-account-manager/db.conf \
+&& sed -i "s/\"DB_PASSWORD\",.*\".*\"/\"DB_PASSWORD\", \"password1234\"/g" /etc/flexisip-account-manager/db.conf \
+&& sed -i "s/\"DB_NAME\",.*\".*\"/\"DB_NAME\", \"flexisip\"/g" /etc/flexisip-account-manager/db.conf \
+&& sed -i "s/(\"REMOTE_PROVISIONING_OVERWRITE_ALL\",.*);/(\"REMOTE_PROVISIONING_OVERWRITE_ALL\", True);/g" /etc/flexisip-account-manager/provisioning.conf \
+&& touch /var/opt/belledonne-communications/flexiapi/storage/db.sqlite \
+&& chown -R apache:apache /opt/belledonne-communications/share/flexisip-account-manager \
+&& cd /opt/belledonne-communications/share/flexisip-account-manager/flexiapi \
+&& composer install --no-dev
+.....
+```
+
+Implement the below php commnds in docker container lamp-c7
+```
+# php /opt/belledonne-communications/share/flexisip-account-manager/tools/create_tables.php
+# php artisan key:generate
+# php artisan migrate:rollback
+# php artisan migrate
+```
+
+Set an account admin user {account_id}, in advance, you should create at least one user and use user's account_id
+```
+# php artisan accounts:set-admin 1
+```
+
+Then start server
+```
+# php artisan serve --host 127.0.0.1
+```
+
+Access
+
+`http://localhost:8000`
+
 **Github**
 'https://gitlab.linphone.org/BC/public/flexisip-account-manager/tree/master/flexiapi'
 
