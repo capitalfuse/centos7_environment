@@ -15,7 +15,7 @@ services:
       # shared database
       - mariadb:/var/lib/mysql
       # copy flexiapi env file
-      - ./flexiapi_env/flexiapi.env:/opt/belledonne-communications/share/flexisip-account-manager/flexiapi/.env
+      # - ./flexiapi_env/flexiapi.env:/opt/belledonne-communications/share/flexisip-account-manager/flexiapi/.env
       # for laravel php framework
       # - ./html:/var/www/html:rw
       # - ./etc/flexisip-account-manager:/etc/flexisip-account-manager:rw

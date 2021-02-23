@@ -1,5 +1,5 @@
 FROM local/c7-systemd
-MAINTAINER  Jehan Monnier <jehan.monnier@linphone.org>
+MAINTAINER  Takanobu Fuse <ficus.online@gmail.com>
 
 # Prepare the Belledonne's repository
 COPY Belledonne.repo /etc/yum.repos.d/Belledonne.repo

@@ -96,6 +96,8 @@ RUN mkdir -p /opt/belledonne-communications/share/flexisip-account-manager /etc/
 ########## $ php artisan migrate
 ### set an account admin user {account_id}, in advance create user and use user's account_id 
 ########## $ php artisan accounts:set-admin 1
+### start api server
+########## $ php artisan serve --host 127.0.0.1
 
 # Make the log directory and the log file for flexisip-account-manager    
 RUN mkdir -p /var/opt/belledonne-communications/log \
@@ -103,8 +105,16 @@ RUN mkdir -p /var/opt/belledonne-communications/log \
 && touch account-manager.log \
 && chown apache:apache account-manager.log
 
-#EXPOSE 80
+# add MariaDB and PHP script
+COPY mariadb-php.sh /
+COPY flexiapi.env /opt/belledonne-communications/share/flexisip-account-manager/flexiapi/.env
+RUN chmod a+x /mariadb-php.sh
 
+#EXPOSE 80
+WORKDIR /opt/belledonne-communications/share/flexisip-account-manager/flexiapi
 RUN systemctl enable httpd.service mariadb.service redis.service
-CMD ["/usr/sbin/init"]
+
+ENTRYPOINT ["/usr/sbin/init"]
+### if not working the following script, execute it in the container of lamp-c7
+CMD ["/mariadb-php.sh"]
 
