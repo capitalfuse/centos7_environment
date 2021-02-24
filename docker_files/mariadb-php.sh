@@ -16,5 +16,5 @@ php artisan key:generate
 php artisan migrate
 ### set an account admin user {account_id}, in advance create user and use user's account_id 
 php artisan accounts:set-admin 3
-### start api server
-php artisan serve --host 127.0.0.1 &
+### start api server (only execute to check as localhost )
+# php artisan serve --host 127.0.0.1 &

@@ -200,7 +200,7 @@ $ php artisan migrate
 ```
 
 As not exist server.php in /opt/belledonne-communications/share/flexisip-account-manager/flexiapi directory
-make it.
+make it.(If you need to check as http://localhost:8000)
 `/opt/belledonne-communications/share/flexisip-account-manager/flexiapi/server.php`
 ```
 <?php
@@ -227,13 +227,19 @@ require_once __DIR__.'/public/index.php';
 
 ```
 
-Start flexisip-account-manager server:
+Start flexisip-account-manager server(checking as localhost):
 ```
 $ php artisan serve --host 127.0.0.1
 ```
 Access
 
 `http://localhost:8000`
+
+Normally, not need `php artisan serve` command, then access;
+
+`http://your_server_domain/flexiapi`
+
+
 
 If you try latest version frontend, download it from github and copy it into this directory;
 `/opt/belledonne-communications/share/flexisip-account-manager/flexiapi`
@@ -277,7 +283,7 @@ Set an account admin user {account_id}, in advance, you should create at least o
 # php artisan accounts:set-admin 1
 ```
 
-Then start server
+Then start server(checking as localhost):
 ```
 # php artisan serve --host 127.0.0.1
 ```
@@ -285,6 +291,10 @@ Then start server
 Access
 
 `http://localhost:8000`
+
+Normally, not need `php artisan serve` command, then access;
+
+`http://your_server_domain/flexiapi`
 
 **Github**
 'https://gitlab.linphone.org/BC/public/flexisip-account-manager/tree/master/flexiapi'
