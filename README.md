@@ -296,6 +296,48 @@ Normally, not need `php artisan serve` command, then access;
 
 `http://your_server_domain/flexiapi`
 
+## NOTES) SELinux and Firewall
+
+It seems that CentOS is embedded SELinux and Firewall for solid security reason as default.
+
+How to confirm SELinux and Firewall on CentOS
+```
+# sestatus
+# firewall-cmd --state
+```
+
+So, Disable these or need to execute below commands to avoid permission erros and so on.
+
+```
+# chcon -R -t httpd_sys_rw_content_t /opt/belledonne-communications/share/flexisip-account-manager/flexiapi/storage/
+# chcon -R -t httpd_sys_rw_content_t /var/opt/belledonne-communications/flexiapi/storage/db.sqlite
+
+// Open remote connections on the MySQL port for example
+# semanage port -a -t http_port_t -p tcp 3306
+
+// Allow remote network connected
+# setsebool httpd_can_network_connect 1 
+
+// Allow remote database connection
+# setsebool httpd_can_network_connect_db 1 
+
+// If SELinux forbids mail sending you can try this command
+# setsebool -P httpd_can_sendmail=1
+
+// If it is running you can add a rule to allow https traffic
+# firewall-cmd --zone public --permanent --add-port=444/tcp && firewall-cmd --reload
+
+// If you use the standard https port (443) or http (80) the following command might be better
+# firewall-cmd --zone public --permanent --add-service={http,https} && firewall-cmd --reload
+```
+
+Also it can listen on IPv6 only.
+
+To fix that, edit `/opt/rh/httpd24/root/etc/httpd/conf.d/ssl.conf` 
+
+and add/set: `Listen 0.0.0.0:444 https`
+
+
 **Github**
 'https://gitlab.linphone.org/BC/public/flexisip-account-manager/tree/master/flexiapi'
 

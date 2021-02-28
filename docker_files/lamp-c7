@@ -42,7 +42,7 @@ COPY MariaDB.repo /etc/yum.repos.d/MariaDB.repo
 RUN yum -y install MariaDB-server MariaDB-client
 ### Create database and use and set root password in docker container lamp-c7
 ########## $ mariadb -u root -e 'create database flexisip;'
-########## $ mariadb -u root -e 'grant all privileges on flexisip.* TO 'flexisip'@'localhost' identified by 'password1234';'
+########## $ mariadb -u root -e 'grant all privileges on flexisip.* TO 'flexisip'@'localhost' identified by "password1234";'
 ########## $ mariadb -u root -e 'set password for 'root'@localhost = password("password1234");'
 # Place VOLUME statement below all changes to /var/lib/mysql
 VOLUME /var/lib/mysql
@@ -88,7 +88,14 @@ RUN mkdir -p /opt/belledonne-communications/share/flexisip-account-manager /etc/
 && touch /var/opt/belledonne-communications/flexiapi/storage/db.sqlite \
 && chown -R apache:apache /opt/belledonne-communications/share/flexisip-account-manager \
 && cd /opt/belledonne-communications/share/flexisip-account-manager/flexiapi \
+&& cp .env.example .env
 && composer install --no-dev
+###
+# Make the log directory and the log file for flexisip-account-manager    
+RUN mkdir -p /var/opt/belledonne-communications/log \
+&& touch /var/opt/belledonne-communications/log/account-manager.log \
+&& chown apache:apache /var/opt/belledonne-communications/log/account-manager.log
+###
 ### Implement the below php commnds in docker container lamp-c7
 ########## $ php /opt/belledonne-communications/share/flexisip-account-manager/tools/create_tables.php
 ########## $ php artisan key:generate
@@ -96,14 +103,8 @@ RUN mkdir -p /opt/belledonne-communications/share/flexisip-account-manager /etc/
 ########## $ php artisan migrate
 ### set an account admin user {account_id}, in advance create user and use user's account_id 
 ########## $ php artisan accounts:set-admin 1
-### start api server
+### start api server(only execute this command in case of checking as localhost)
 ########## $ php artisan serve --host 127.0.0.1
-
-# Make the log directory and the log file for flexisip-account-manager    
-RUN mkdir -p /var/opt/belledonne-communications/log \
-&& cd /var/opt/belledonne-communications/log \
-&& touch account-manager.log \
-&& chown apache:apache account-manager.log
 
 # add MariaDB and PHP script
 COPY mariadb-php.sh /
